@@ -18,9 +18,11 @@
 │   └── processing.py   # filter_by_state и sort_by_date
 ├── tests/              # тесты
 │   ├── __init__.py
+│   ├── conftest.py     # общие фикстуры
 │   ├── test_masks.py
 │   ├── test_widget.py
 │   └── test_processing.py
+├── htmlcov/            # HTML-отчёт покрытия тестами
 ├── .flake8             # конфигурация Flake8
 ├── pyproject.toml      # зависимости и настройки black, isort, mypy
 └── README.md
@@ -114,8 +116,24 @@ poetry run isort --check-only src tests
 poetry run mypy src
 ```
 
-## Тесты
+## Тестирование
+
+Проект покрыт тестами на `pytest`. Тесты лежат в каталоге `tests/` и разделены
+по модулям: `test_masks.py`, `test_widget.py`, `test_processing.py`. Общие
+фикстуры с тестовыми данными вынесены в `tests/conftest.py`.
+
+Запуск всех тестов:
 
 ```bash
 poetry run pytest
+```
+
+Команда запускает тесты с измерением покрытия и генерирует HTML-отчёт в каталоге
+`htmlcov/` (отчёт можно открыть в браузере: `htmlcov/index.html`). Текущее
+покрытие кода в `src/` — 100% (порог в задании: не менее 80%).
+
+Чтобы запустить тесты без отчёта покрытия:
+
+```bash
+poetry run pytest --no-cov
 ```
