@@ -18,17 +18,34 @@ from src.widget import get_date, mask_account_card
     ],
 )
 def test_mask_account_card(account_card: str, expected: str) -> None:
-    """Проверяет маскировку карт и счетов с сохранением их типа."""
+    """Проверяет распознавание карты/счёта и корректную маскировку номера."""
     assert mask_account_card(account_card) == expected
 
 
-@pytest.mark.parametrize("account_card", ["", "   ", "Maestro"])
+@pytest.mark.parametrize("account_card", ["", "   ", "Maestro", "Счет", "Visa"])
 def test_mask_account_card_invalid_input(account_card: str) -> None:
-    """Проверяет защиту от некорректного ввода: пустая строка или нет номера."""
+    """Проверяет устойчивость функции к некорректному вводу."""
     with pytest.raises(ValueError):
         mask_account_card(account_card)
 
 
-def test_get_date() -> None:
-    """Проверяет преобразование даты из ISO-формата в ДД.ММ.ГГГГ."""
-    assert get_date("2024-03-11T02:26:18.671407") == "11.03.2024"
+@pytest.mark.parametrize(
+    ("date_string", "expected"),
+    [
+        ("2024-03-11T02:26:18.671407", "11.03.2024"),
+        ("2019-07-03T18:35:29.512364", "03.07.2019"),
+        ("2018-06-30", "30.06.2018"),
+        ("2018-06-30T02:08:58", "30.06.2018"),
+        ("2018-06-30T02:08:58.425572", "30.06.2018"),
+    ],
+)
+def test_get_date(date_string: str, expected: str) -> None:
+    """Проверяет преобразование корректных дат из ISO-формата."""
+    assert get_date(date_string) == expected
+
+
+@pytest.mark.parametrize("date_string", ["", "not-a-date", "2024-13-40T00:00:00"])
+def test_get_date_invalid_input(date_string: str) -> None:
+    """Проверяет, что при некорректной дате возникает ValueError."""
+    with pytest.raises(ValueError):
+        get_date(date_string)
