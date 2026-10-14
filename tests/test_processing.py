@@ -1,48 +1,94 @@
+from typing import Any
+
+import pytest
+
 from src.processing import filter_by_state, sort_by_date
 
-TRANSACTIONS = [
-    {"id": 41428829, "state": "EXECUTED", "date": "2019-07-03T18:35:29.512364"},
-    {"id": 939719570, "state": "EXECUTED", "date": "2018-06-30T02:08:58.425572"},
-    {"id": 594226727, "state": "CANCELED", "date": "2018-09-12T21:27:25.241689"},
-    {"id": 615064591, "state": "CANCELED", "date": "2018-10-14T08:21:33.419441"},
-]
+
+@pytest.mark.parametrize(
+    ("state", "expected_ids"),
+    [
+        ("EXECUTED", [41428829, 939719570]),
+        ("CANCELED", [594226727, 615064591]),
+        ("PENDING", []),
+    ],
+)
+def test_filter_by_state(
+    transactions: list[dict[str, Any]], state: str, expected_ids: list[int]
+) -> None:
+    """Проверяет фильтрацию по разным значениям статуса."""
+    result = filter_by_state(transactions, state)
+    assert [transaction["id"] for transaction in result] == expected_ids
 
 
-def test_filter_by_state_default() -> None:
-    """Проверяет фильтрацию по статусу 'EXECUTED' по умолчанию."""
-    assert filter_by_state(TRANSACTIONS) == [TRANSACTIONS[0], TRANSACTIONS[1]]
+def test_filter_by_state_default_is_executed(
+    transactions: list[dict[str, Any]],
+) -> None:
+    """Проверяет, что по умолчанию фильтрация идёт по статусу EXECUTED."""
+    result = filter_by_state(transactions)
+    assert all(transaction["state"] == "EXECUTED" for transaction in result)
+    assert len(result) == 2
 
 
-def test_filter_by_state_canceled() -> None:
-    """Проверяет фильтрацию по явно переданному статусу 'CANCELED'."""
-    assert filter_by_state(TRANSACTIONS, "CANCELED") == [
-        TRANSACTIONS[2],
-        TRANSACTIONS[3],
-    ]
+def test_filter_by_state_empty_result(
+    transactions_without_executed: list[dict[str, Any]],
+) -> None:
+    """Проверяет возврат пустого списка, если нужного статуса нет."""
+    assert filter_by_state(transactions_without_executed) == []
 
 
-def test_filter_by_state_does_not_mutate_source() -> None:
+def test_filter_by_state_does_not_mutate_source(
+    transactions: list[dict[str, Any]],
+) -> None:
     """Проверяет, что исходный список не изменяется."""
-    original = [transaction.copy() for transaction in TRANSACTIONS]
-    filter_by_state(TRANSACTIONS, "CANCELED")
-    assert TRANSACTIONS == original
+    original = [transaction.copy() for transaction in transactions]
+    filter_by_state(transactions, "CANCELED")
+    assert transactions == original
 
 
-def test_sort_by_date_descending() -> None:
-    """Проверяет сортировку по убыванию даты (по умолчанию)."""
-    assert sort_by_date(TRANSACTIONS) == [
-        TRANSACTIONS[0],
-        TRANSACTIONS[3],
-        TRANSACTIONS[2],
-        TRANSACTIONS[1],
+def test_sort_by_date_default_descending(
+    transactions: list[dict[str, Any]],
+) -> None:
+    """Проверяет сортировку по убыванию даты по умолчанию."""
+    result = sort_by_date(transactions)
+    assert [transaction["id"] for transaction in result] == [
+        41428829,
+        615064591,
+        594226727,
+        939719570,
     ]
 
 
-def test_sort_by_date_ascending() -> None:
+def test_sort_by_date_ascending(
+    transactions: list[dict[str, Any]],
+) -> None:
     """Проверяет сортировку по возрастанию даты."""
-    assert sort_by_date(TRANSACTIONS, reverse=False) == [
-        TRANSACTIONS[1],
-        TRANSACTIONS[2],
-        TRANSACTIONS[3],
-        TRANSACTIONS[0],
+    result = sort_by_date(transactions, reverse=False)
+    assert [transaction["id"] for transaction in result] == [
+        939719570,
+        594226727,
+        615064591,
+        41428829,
     ]
+
+
+def test_sort_by_date_equal_dates_keeps_order(
+    transactions_same_date: list[dict[str, Any]],
+) -> None:
+    """Проверяет, что при одинаковых датах сохраняется исходный порядок."""
+    result = sort_by_date(transactions_same_date)
+    assert [transaction["id"] for transaction in result] == [1, 2]
+
+
+def test_sort_by_date_does_not_mutate_source(
+    transactions: list[dict[str, Any]],
+) -> None:
+    """Проверяет, что исходный список не изменяется."""
+    original = [transaction.copy() for transaction in transactions]
+    sort_by_date(transactions)
+    assert transactions == original
+
+
+def test_sort_by_date_empty(empty_transactions: list[dict[str, Any]]) -> None:
+    """Проверяет сортировку пустого списка."""
+    assert sort_by_date(empty_transactions) == []
