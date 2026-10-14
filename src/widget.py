@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.masks import get_mask_account, get_mask_card_number
 
 
@@ -33,3 +35,14 @@ def mask_account_card(account_card: str) -> str:
         masked_number = get_mask_card_number(number)
 
     return f"{name} {masked_number}"
+
+
+def get_date(date_string: str) -> str:
+    """
+    Преобразует дату из ISO-формата в формат ``ДД.ММ.ГГГГ``.
+
+    :param date_string: Дата в ISO-формате, например
+        ``2024-03-11T02:26:18.671407``.
+    :return: Дата в формате ``11.03.2024``.
+    """
+    return datetime.fromisoformat(date_string).strftime("%d.%m.%Y")
