@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "bank-widget"
+version = "0.1.0"
+description = "Виджет для отображения последних успешных банковских операций клиента"
+authors = ["N. J. Morgan"]
+readme = "README.md"
+packages = [{ include = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.lint.dependencies]
+flake8 = "^7.4.1"
+black = "^26.10.1"
+isort = "^9.0.2"
+mypy = "^2.4.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.1.1"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
