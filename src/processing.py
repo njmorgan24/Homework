@@ -18,3 +18,23 @@ def filter_by_state(
     return [
         transaction for transaction in transactions if transaction.get("state") == state
     ]
+
+
+def sort_by_date(
+    transactions: list[dict[str, Any]], reverse: bool = True
+) -> list[dict[str, Any]]:
+    """
+    Сортирует список банковских операций по дате.
+
+    Возвращает новый список, отсортированный по ключу ``date``. Исходный
+    список не изменяется. Даты в ISO-формате сравниваются как строки, что
+    соответствует хронологическому порядку.
+
+    :param transactions: Список словарей с данными о банковских операциях.
+    :param reverse: Порядок сортировки. По умолчанию ``True`` — по убыванию
+        (сначала самые последние операции).
+    :return: Новый список словарей, отсортированный по дате.
+    """
+    return sorted(
+        transactions, key=lambda transaction: transaction["date"], reverse=reverse
+    )
